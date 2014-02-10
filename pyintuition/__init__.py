@@ -76,7 +76,7 @@ class Intuition(object):
         cookies = os.environ['HTTP_COOKIE'].split(';')
         for cookie in cookies:
             (key, value) = cookie.split('=')
-            if key = Intuition.COOKIE_USERLANG:
+            if key == Intuition.COOKIE_USERLANG:
                 return value
             
         return self.default_language
