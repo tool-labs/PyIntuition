@@ -73,11 +73,12 @@ class Intuition(object):
         langauge is used.
         """
 
-        cookies = os.environ['HTTP_COOKIE'].split(';')
-        for cookie in cookies:
-            (key, value) = cookie.split('=')
-            if key == Intuition.COOKIE_USERLANG:
-                return value
+        if 'HTTP_COOKIE' in os.environ:
+            cookies = os.environ['HTTP_COOKIE'].split(';')
+            for cookie in cookies:
+                (key, value) = cookie.split('=')
+                if key == Intuition.COOKIE_USERLANG:
+                    return value
             
         return self.default_language
 
