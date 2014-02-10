@@ -205,6 +205,6 @@ def init(domain, environment=None, **kwargs):
 
     intuition = Intuition(domain=domain, **kwargs)
 
-    if environment not None:
+    if environment is not None:
         environment.globals['msg'] = get
 
