@@ -204,6 +204,7 @@ def init(domain, environment=None, **kwargs):
     provide the messages.
     """
 
+    global intuition
     intuition = Intuition(domain=domain, **kwargs)
 
     if environment is not None:
