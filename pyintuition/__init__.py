@@ -93,7 +93,7 @@ class Intuition(object):
             if self.default_domain is None:
                 raise ValueError('No domain given!')
             domain = self.default_domain
-        messages = self.get_domain(domain)
+        messages = self.get_domain(domain, language)
 
         if not key in messages and self.update_on_missing:
             messages = self.get_domain(domain, language, force_download=True)
