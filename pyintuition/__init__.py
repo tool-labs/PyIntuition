@@ -82,11 +82,12 @@ class Intuition(object):
             
         return self.default_language
 
-    def get(self, key, domain=None, language=None):
+    def get(self, key, domain=None, language=None, context=None):
         """
         Returns the localized message for the given key, domain and language.  
         The domain and language may be `None` to use the default values.  If the
-        domain or the key are invalid, a `ValueError` is thrown.
+        domain or the key are invalid, a `ValueError` is thrown.  The message is
+        formatted using the `context` list.
         """
 
         if domain is None:
@@ -101,7 +102,14 @@ class Intuition(object):
         if not key in messages:
             raise ValueError('No message for that key!')
 
-        return messages[key]        
+        message = messages[key]
+        
+        if context is not None:
+            for i in range(0, len(context)):
+                placeholder = "${0}".format(i + 1)
+                message = message.replace(placeholder, context[i])
+        
+        return message
 
     def get_domain(self, domain, language=None, force_download=False):
         """
@@ -188,14 +196,14 @@ class Intuition(object):
 
 intuition = Intuition()
 
-def get(key, domain=None, language=None):
+def get(key, domain=None, language=None, context=None):
     """
     Get a message for the given key, domain and language from the default
     Intuition instance.  If the domain or language are `None`, the default
-    values are used.
+    values are used.  The message will be formatted using the given context.
     """
 
-    return intuition.get(key, domain, language)
+    return intuition.get(key, domain, language, context)
 
 def init(domain, environment=None, **kwargs):
     """
