@@ -4,6 +4,7 @@ import datetime
 import json
 import os
 import os.path
+import socket
 import urllib2
 import time
 
@@ -27,8 +28,12 @@ class Intuition(object):
     Static fields:
         `COOKIE_USERLANG`           the cookie to read the language from
         `DEFAULT_TRANSLATION_PATH`  the default path to store the translations to
-        `DOWNLOAD_URL`              the URL to get the messages from (to be
+        `DOWNLOAD_URL_WWW`          the URL to get the messages from (to be
                                     formatted with the domain(s) and the language)
+				    to be accessed outside of Wikimedia Labs
+	`DOWNLOAD_URL_LABS`         the URL to get the messages from (to be
+	                            formatted with the domain(s) and the language)
+				    to be accessed within Wikimedia Labs
         `HOMEPAGE`                  the URL of the Intuition homepage
     """
 
@@ -36,7 +41,9 @@ class Intuition(object):
 
     DEFAULT_TRANSLATION_PATH = os.path.expanduser('~/intuition')
 
-    DOWNLOAD_URL = 'https://tools.wmflabs.org/intuition/api.php?domains={}&lang={}'
+    DOWNLOAD_URL_WWW = 'https://tools.wmflabs.org/intuition/api.php?domains={}&lang={}'
+
+    DOWNLOAD_URL_LABS = 'https://tools-webproxy/intuition/api.php?domains={}&lang={}'
 
     HOMEPAGE = 'https://tools.wmflabs.org/intuition/'
 
@@ -66,6 +73,11 @@ class Intuition(object):
 
         if not os.path.exists(self.translation_path):
             os.mkdir(self.translation_path)
+
+	if socket.getfqdn().endswith('.wmflabs'):
+	    self.download_url = Intuition.DOWNLOAD_URL_LABS
+	else:
+	    self.download_url = Intuition.DOWNLOAD_URL_WWW
 
     def init_language(self):
         """
@@ -100,14 +112,14 @@ class Intuition(object):
             messages = self.get_domain(domain, language, force_download=True)
 
         if not key in messages:
-            raise ValueError('No message for that key!')
+            raise ValueError('No message for the key {0}!'.format(key))
 
         message = messages[key]
         
         if context is not None:
             for i in range(0, len(context)):
                 placeholder = "${0}".format(i + 1)
-                message = message.replace(placeholder, context[i])
+                message = message.replace(placeholder, unicode(context[i]))
         
         return message
 
@@ -152,7 +164,7 @@ class Intuition(object):
         domain_path = '{}/{}_{}.json'.format(self.translation_path,
                                              domain, language)
         if force_download or not os.path.exists(domain_path) or self.is_file_outdated(domain_path):
-            url = Intuition.DOWNLOAD_URL.format(domain, language)
+            url = self.download_url.format(domain, language)
             result = urllib2.urlopen(url)
             domain_file = open(domain_path, 'w')
             domain_file.write(result.read())
